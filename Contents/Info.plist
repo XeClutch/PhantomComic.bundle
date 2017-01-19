@@ -1,23 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>com.plexapp.phantomcomic</string>
-	
+	<string>com.plexapp.plugins.phantomcomic</string>
 	<key>PlexClientPlatforms</key>
-	<string>MacOSX,Linux,Windows,iOS,Android,LGTV,Roku</string>
-	
+	<string>*</string>
 	<key>PlexFrameworkVersion</key>
 	<string>2</string>
-	
-	<key>PlexMediaContainer</key>
-	<array>
-		<string>JPEG</string>
-		<string>JPG</string>
-		<string>PNG</string>
-	</array>
-	
 	<key>PlexPluginClass</key>
 	<string>Content</string>
 </dict>
