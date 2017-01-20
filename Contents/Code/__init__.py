@@ -2,7 +2,7 @@ import os
 
 ### PhantomComic for Plex
 ### Copyright (c) Joshua Ozeri 2017
-NAME = "PhantomComic for Plex 0.1"
+NAME = "PhantomComic"
 PREFIX = "/photos/phantomcomic"
 ### PhantomComic is a Plex channel meant to be ran alongside the PhantomComic for Windows application.
 ### PhantomComic for Plex simply acts as a reader for the comics downloaded with the Windows application.
@@ -10,27 +10,90 @@ PREFIX = "/photos/phantomcomic"
 def Start():
 	ObjectContainer.title1 = NAME
 
-@handler(PREFIX, NAME)
+@handler(PREFIX, NAME, art=R("art-default.png"), thumb=R("icon-default.png"))
 def MainMenu():
 	oc = ObjectContainer()
-	for (root, comics, files) in os.walk("X:\\Comics\\data"):
-		for name in comics:
-			oc.add(DirectoryObject(key=Callback(ComicMenu, comic=name), title=open(root + "\\" + name + "\\detail").read()), thumb=R(root + "\\" + name + "\\banner"))
+	root = "X:\\Comics\\data\\"
+	comics = os.listdir(root)
+	for comic in comics:
+		if os.path.isdir(root + comic):
+			oc.add(DirectoryObject(key=Callback(ComicMenu, comic=comic), title=Core.storage.load(root + comic + "\\detail"), thumb=(root + comic + "\\banner")))
 	return oc
 
-@route(PREFIX + "/comicmenu", comic=string)
+@route(PREFIX + "/comicmenu")
 def ComicMenu(comic):
+	root = "X:\\Comics\\data\\"
+	chapters = os.listdir(root + comic + "\\comic\\")
 	oc = ObjectContainer()
-	for (root, chapters, files) in os.walk("X:\\Comics\\data\\" + comic + "\\comic"):
-		for chapter in chapters:
-			oc.add(DirectoryObject(key=Callback(ChapterMenu, _comic=comic, _chapter=chapter), title=("Chapter " + chapter), thumb=(root + "\\" + comic + "\\comic\\" + chapter + "\\001")))
+	oc.title1 = Core.storage.load(root + comic + "\\detail")
+	for chapter in chapters:
+		if os.path.isdir(root + comic + "\\comic\\" + chapter):
+			url = (root + comic + "\\comic\\" + chapter)
+			oc.add(PhotoAlbumObject(
+				key=Callback(GetPhotoAlbum, url=url, title=("Chapter " + chapter)),
+				rating_key=url,
+				title=("Chapter " + chapter),
+				source_title=Core.storage.load(root + comic + "\\detail"),
+				tagline=None,
+				originally_available_at=None,
+				thumb=(url + "\\001"),
+				art=(root + comic + "\\banner")))
+	return oc
+	# setup vars
+	root = "X:\\Comics\\data\\"
+	pages = os.listdir(root + comic + "\\comic\\" + chapter)
+	# setup objectcontainer
+	oc = ObjectContainer()
+	oc.title1 = "Chapter " + chapter
+	# create album
+	url = (root + comic + "\\comic\\" + chapter)
+	oc.add(PhotoAlbumObject(
+		key=Callback(GetPhotoAlbum, url=url, title=("Chapter " + chapter)),
+		rating_key=url,
+		title=("Chapter " + chapter),
+		source_title=Core.storage.load(root + comic + "\\detail"),
+		tagline=None,
+		originally_available_at=None,
+		thumb=(url + "\\001"),
+		art=(root + comic + "\\banner")))
+	# ret oc
 	return oc
 
-@route(PREFIX + "/chaptermenu", _comic=string, _chapter=string)
-def ChapterMenu(_comic, _chapter):
+# GetPhotoAlbum
+#   Create and return the contents of a photo album.
+@route(PREFIX + "/get/album")
+def GetPhotoAlbum(url, title):
+	# setup objectcontainer
 	oc = ObjectContainer()
-	for (root, dirs, pages) in os.walk("X:\\Comics\\data\\" + _comic + "\\comic\\" + _chapter)
-		for page in pages:
-			url = (root + "\\" + _comic + "\\comic\\" + _chapter + "\\" + page)
-			oc.add(PhotoObject(key=Callback(url), rating_key=url, title=("Page " + page)))
+	oc.title2 = title
+	# setup vars
+	pages = os.listdir(url)
+	# loop pages
+	for page in pages:
+		# create new photo object for each page
+		oc.add(CreatePhotoObject(
+			title=("Page " + page),
+			url=Callback(GetPhoto, url=(url + "\\" + page))))
+	# ret oc
 	return oc
+# CreatePhotoObject
+#   Initialize and return a photo object.
+@route(PREFIX + "/createphotoobject")
+def CreatePhotoObject(title, url, include_container=False, *args, **kwargs):
+	po = PhotoObject(
+		key = Callback(CreatePhotoObject, title=title, url=url, include_container=True),
+		rating_key = url,
+		source_title = "Reader",
+		title = title,
+		thumb = url,
+		art = R("art-default.png"),
+		items = [MediaObject(parts = [PartObject(key=url)])]
+	)
+	if include_container:
+		return ObjectContainer(objects=[po])
+	return po
+# GetPhoto
+#   ----
+@route(PREFIX + "/get/photo")
+def GetPhoto(url):
+	return Redirect(url)
