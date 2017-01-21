@@ -39,25 +39,6 @@ def ComicMenu(comic):
 				thumb=(url + "\\001"),
 				art=(root + comic + "\\banner")))
 	return oc
-	# setup vars
-	root = "X:\\Comics\\data\\"
-	pages = os.listdir(root + comic + "\\comic\\" + chapter)
-	# setup objectcontainer
-	oc = ObjectContainer()
-	oc.title1 = "Chapter " + chapter
-	# create album
-	url = (root + comic + "\\comic\\" + chapter)
-	oc.add(PhotoAlbumObject(
-		key=Callback(GetPhotoAlbum, url=url, title=("Chapter " + chapter)),
-		rating_key=url,
-		title=("Chapter " + chapter),
-		source_title=Core.storage.load(root + comic + "\\detail"),
-		tagline=None,
-		originally_available_at=None,
-		thumb=(url + "\\001"),
-		art=(root + comic + "\\banner")))
-	# ret oc
-	return oc
 
 # GetPhotoAlbum
 #   Create and return the contents of a photo album.
