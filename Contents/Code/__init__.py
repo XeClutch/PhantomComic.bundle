@@ -13,31 +13,31 @@ def Start():
 @handler(PREFIX, NAME, art=R("art-default.png"), thumb=R("icon-default.png"))
 def MainMenu():
 	oc = ObjectContainer()
-	root = "X:\\Comics\\data\\"
+	root = Prefs["install_path"] + "data\\"
 	comics = os.listdir(root)
 	for comic in comics:
 		if os.path.isdir(root + comic):
-			oc.add(DirectoryObject(key=Callback(ComicMenu, comic=comic), title=Core.storage.load(root + comic + "\\detail"), thumb=(root + comic + "\\banner")))
+			oc.add(DirectoryObject(key=Callback(ComicMenu, comic=comic), title=Core.storage.load(root + comic + "\\detail.txt"), summary=Core.storage.load(root + comic + "\\desc.txt"), thumb=(Prefs["install_url"] + "/data/" + comic + "/banner.jpg")))
 	return oc
 
 @route(PREFIX + "/comicmenu")
 def ComicMenu(comic):
-	root = "X:\\Comics\\data\\"
+	root = Prefs["install_path"] + "data\\"
 	chapters = os.listdir(root + comic + "\\comic\\")
 	oc = ObjectContainer()
-	oc.title1 = Core.storage.load(root + comic + "\\detail")
+	oc.title1 = Core.storage.load(root + comic + "\\detail.txt")
 	for chapter in chapters:
 		if os.path.isdir(root + comic + "\\comic\\" + chapter):
-			url = (root + comic + "\\comic\\" + chapter)
+			url = (Prefs["install_url"] + "/data/" + comic + "/comic/" + chapter)
 			oc.add(PhotoAlbumObject(
-				key=Callback(GetPhotoAlbum, url=url, title=("Chapter " + chapter)),
+				key=Callback(GetPhotoAlbum, url=(root + comic + "\\comic\\" + chapter), title=("Chapter " + chapter)),
 				rating_key=url,
 				title=("Chapter " + chapter),
-				source_title=Core.storage.load(root + comic + "\\detail"),
+				source_title=Core.storage.load(root + comic + "\\detail.txt"),
 				tagline=None,
 				originally_available_at=None,
-				thumb=(url + "\\001"),
-				art=(root + comic + "\\banner")))
+				thumb=(url + "\\001.jpg"),
+				art=R("art-default.png")))
 	return oc
 
 # GetPhotoAlbum
@@ -53,8 +53,8 @@ def GetPhotoAlbum(url, title):
 	for page in pages:
 		# create new photo object for each page
 		oc.add(CreatePhotoObject(
-			title=("Page " + page),
-			url=Callback(GetPhoto, url=(url + "\\" + page))))
+			title=("Page " + page.replace(".jpg", "")),
+			url=Callback(GetPhoto, url=(url.replace(Prefs["install_path"], Prefs["install_url"] + "/")) + "/" + page)))
 	# ret oc
 	return oc
 # CreatePhotoObject
@@ -64,7 +64,7 @@ def CreatePhotoObject(title, url, include_container=False, *args, **kwargs):
 	po = PhotoObject(
 		key = Callback(CreatePhotoObject, title=title, url=url, include_container=True),
 		rating_key = url,
-		source_title = "Reader",
+		#source_title = "Reader",
 		title = title,
 		thumb = url,
 		art = R("art-default.png"),

@@ -1,0 +1,14 @@
+[
+	{
+		"id": "install_path",
+		"label": "PhantomComic installation path",
+		"type": "text",
+		"default": "X:\\Comics\\"
+	},
+	{
+		"id": "install_url",
+		"label": "Site name (or IP:Port) of the virtual directory pointing to the PhantomComic installation path",
+		"type": "text",
+		"default": "127.0.0.1:59269"
+	},
+]
